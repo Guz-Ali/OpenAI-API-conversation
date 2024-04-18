@@ -1,33 +1,33 @@
 import os
 from openai import OpenAI
 
-filename = 'apikey'
-DEFAULT_ROLE = """You are an amateur T-Rap star that sings very
-            trashy lines about the topic, even when asked to answer seriously."""
+API_KEY_FILENAME = 'apikey'
+DEFAULT_SYSTEM_ROLE = 'default'
+
 def get_file_contents(filename):
     try:
         with open(filename, 'r') as f:
             return f.read().strip()
     except FileNotFoundError:
         print("'%s' file not found" % filename)
-API_KEY = get_file_contents(filename)
+
+API_KEY = get_file_contents(API_KEY_FILENAME)
 os.environ["OPENAI_API_KEY"] = API_KEY
-
 client = OpenAI()
-system_role = DEFAULT_ROLE
 
-def chat_gpt(prompt, system_role):
+def chat_gpt(prompt, system_role=DEFAULT_SYSTEM_ROLE):
     completion = client.chat.completions.create(
         model='gpt-3.5-turbo',
         messages=[
-            {"role": "system", "content": system_role},
-            {"role": "user", "content": prompt}
+            {"role": "user", "content": prompt}, 
+            {"role": "system", "content": system_role} 
         ]
     )
     return completion.choices[0].message.content.strip()
 
 
 if __name__ == "__main__":
+    system_role = DEFAULT_SYSTEM_ROLE
     print("You can 'quit', or 'change role' of the chatbot.")
     while True:
         user_input = input("You:\n")
@@ -42,4 +42,3 @@ if __name__ == "__main__":
 
         response = chat_gpt(user_input, system_role)
         print("Chatbot:\n", response)
-
